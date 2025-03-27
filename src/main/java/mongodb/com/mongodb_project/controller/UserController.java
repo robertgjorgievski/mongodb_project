@@ -2,8 +2,10 @@ package mongodb.com.mongodb_project.controller;
 
 
 import com.mongodb.lang.NonNull;
+import mongodb.com.mongodb_project.app.event.handling.MyEventPublisher;
 import mongodb.com.mongodb_project.model.User;
 import mongodb.com.mongodb_project.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,6 +13,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
+    @Autowired
+    MyEventPublisher publisher;
+
     private final UserRepository userRepository;
 
     public UserController(UserRepository userRepository) {
@@ -19,7 +25,9 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-        return userRepository.save(user);
+        User save = userRepository.save(user);
+        publisher.publishEventMessage("User with name " + user.getName() + " will be saved");
+        return save;
     }
 
     @GetMapping
